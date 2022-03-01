@@ -3,25 +3,39 @@
  * @var $block \Razoyo\AnimalProfile\Block\Profile\Photo
  */
 ?>
-<p><?= $block->getGreeting() ?></p>
-<div id="animalid-photo"></div>
-<script>
-    require(['jquery', 'domReady!'], function ($) {
-        return $.ajax({
-            url: '<?= $block->getPhotoUrl() ?>',
-            type: 'GET'
-        }).done(
-            function (response) {
-                console.log(response);
-                const photoImg = document.createElement('img'); 
-                photoImg.alt = 'Profile photo';
-                photoImg.src = response.photo;
+<p><?= $block->escapeHtml($block->getGreeting()) ?></p>
+<form class="form form-edit-animal-profile"
+      action="<?= $block->escapeUrl($block->getSubmitUrl()) ?>"
+      method="post" id="form-animal-profile"
+      enctype="multipart/form-data"
+      data-hasrequired="<?= $block->escapeHtmlAttr(__('* Required Fields')) ?>"
+      autocomplete="off">
+    <?= $block->getBlockHtml('formkey') ?>
+    <div data-bind="scope: 'animal.profile'" class="animal-profile">
+        <!-- ko template: getTemplate() --><!-- /ko -->
+    </div>
+    <div class="actions-toolbar">
+        <div class="primary">
+            <button type="submit" class="action save primary" title="<?= $block->escapeHtmlAttr(__('Save')) ?>">
+                <span><?= $block->escapeHtml(__('Save')) ?></span>
+            </button>
+        </div>
+    </div>
+</form>
 
-                const photoDiv = document.getElementById('animalid-photo');
-                if (photoDiv) {
-                    photoDiv.appendChild(photoImg);
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Magento_Ui/js/core/app": {
+            "components": {
+                "animal.profile": {
+                    "component": "Razoyo_AnimalProfile/js/profile/view",
+                    "animalOptions": <?= /* @noEscape */ $block->getAnimalOptionsJson() ?>,
+                    "currentAnimal": "<?= /* @noEscape */ $block->getCurrentAnimal() ?>",
+                    "photoBaseUrl": "<?= /* @noEscape */ $block->getPhotoUrl() ?>"
                 }
             }
-        );
-    });
+        }
+    }
+}
 </script>

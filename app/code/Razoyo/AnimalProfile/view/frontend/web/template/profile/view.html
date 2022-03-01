@@ -1,0 +1,8 @@
+<div class="field">
+    <label data-bind="i18n: 'Please select an animal to your profile:'"></label>
+        <select name="animal" data-bind="options: animalOptions, optionsText: 'label', optionsValue: 'value', value: currentAnimal"></select>
+    </label>
+</div>
+<div class="profile-picture" data-bind="afterRender: setupLoading">
+    <img data-bind="attr: { src: imageSrc }" />
+</div>

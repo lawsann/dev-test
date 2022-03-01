@@ -8,13 +8,15 @@ declare(strict_types=1);
 namespace Razoyo\AnimalProfile\Controller\Profile;
 
 use Magento\Framework\App\Action\HttpGetActionInterface;
-use Magento\Framework\App\Response\Http;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Result\PageFactory;
 use Psr\Log\LoggerInterface;
 use Razoyo\AnimalProfile\Animal;
+use Razoyo\AnimalProfile\Model\Attribute\Source\AnimalProfile as AnimalProfileAttributeSource;
 
 class Photo implements HttpGetActionInterface
 {
@@ -23,18 +25,26 @@ class Photo implements HttpGetActionInterface
      * @var PageFactory
      */
     protected $resultPageFactory;
+
     /**
      * @var Json
      */
     protected $serializer;
+
     /**
      * @var LoggerInterface
      */
     protected $logger;
+
     /**
-     * @var Http
+     * @var RequestInterface
      */
-    protected $http;
+    protected $request;
+
+    /**
+     * @var ResponseInterface
+     */
+    protected $response;
 
     /**
      * Constructor
@@ -42,18 +52,21 @@ class Photo implements HttpGetActionInterface
      * @param PageFactory $resultPageFactory
      * @param Json $json
      * @param LoggerInterface $logger
-     * @param Http $http
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
      */
     public function __construct(
         PageFactory $resultPageFactory,
         Json $json,
         LoggerInterface $logger,
-        Http $http
+        RequestInterface $request,
+        ResponseInterface $response
     ) {
         $this->resultPageFactory = $resultPageFactory;
         $this->serializer = $json;
         $this->logger = $logger;
-        $this->http = $http;
+        $this->request = $request;
+        $this->response = $response;
     }
 
     /**
@@ -63,7 +76,24 @@ class Photo implements HttpGetActionInterface
      */
     public function execute()
     {
-        $photo = new Animal\Cat();
+        $animalParam = $this->request->getParam('animal');
+
+        switch ($animalParam) {
+            case AnimalProfileAttributeSource::ANIMAL_DOG:
+                $photo = new Animal\Dog();
+                break;
+            
+            case AnimalProfileAttributeSource::ANIMAL_LLAMA:
+                $photo = new Animal\Llama();
+                break;
+            
+            case AnimalProfileAttributeSource::ANIMAL_ANTEATER:
+                $photo = new Animal\Anteater();
+                break;
+            
+            default:
+                $photo = new Animal\Cat();
+        }
 
         try {
             return $this->jsonResponse(['photo' => $photo->getContent()]);
@@ -80,12 +110,12 @@ class Photo implements HttpGetActionInterface
      *
      * @return ResultInterface
      */
-    public function jsonResponse($response = '')
+    public function jsonResponse($responseJson = '')
     {
-        $this->http->getHeaders()->clearHeaders();
-        $this->http->setHeader('Content-Type', 'application/json');
-        return $this->http->setBody(
-            $this->serializer->serialize($response)
+        //$this->http->getHeaders()->clearHeaders();
+        $this->response->setHeader('Content-Type', 'application/json');
+        return $this->response->setBody(
+            $this->serializer->serialize($responseJson)
         );
     }
 }

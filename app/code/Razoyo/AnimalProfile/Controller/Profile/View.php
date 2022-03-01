@@ -30,7 +30,7 @@ class View extends \Magento\Framework\App\Action\Action
         Session $customerSession,
         PageFactory $pageFactory
     ) {
-        parent::__construct($context, $customerSession);
+        parent::__construct($context);
         $this->customerSession = $customerSession;
         $this->pageFactory = $pageFactory;
     }
